@@ -1,0 +1,19 @@
+stages:
+
+  make_dataset:
+    cmd: python3 src/data/make_dataset.py data/raw/annotations data/interim/annotations.csv
+    deps:
+      - data/raw/annotations
+      - src/data/make_dataset.py
+    outs:
+      - data/interim/annotations.csv
+
+  create_crop_dataset:
+    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/raw/images/  data/processed/cropped_images/sud
+    deps:
+      - data/interim/annotations.csv
+      - data/raw/images
+      - src/data/create_crop_dataset.py
+    outs:
+      - data/processed/cropped_images
+
