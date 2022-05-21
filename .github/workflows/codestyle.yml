@@ -6,7 +6,7 @@ name: Run unit tests with Python
 on:
   push:
     branches:
-      - master
+       - '*'
   pull_request:
     branches:
       - master
