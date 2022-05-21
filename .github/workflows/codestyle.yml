@@ -34,8 +34,8 @@ jobs:
         
     - name: Install dependencies
       run: |
-        sudo apt-get -y install cloud-init
         python -m pip install --upgrade pip
+        python -m pip install click==8.0.4
         pip install flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
