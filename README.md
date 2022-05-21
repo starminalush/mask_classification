@@ -1,7 +1,7 @@
 mask_detection
 ==============================
 
-A short description of the project.
+Репозиторий для классификации масок (есть маска, нет маски, маска надета неправильно)
 
 Project Organization
 ------------
