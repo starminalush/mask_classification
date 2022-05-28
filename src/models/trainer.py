@@ -98,9 +98,8 @@ class Trainer:
                         best_acc = epoch_accuracy
                         best_model_wts = copy.deepcopy(self.model.state_dict())
         time_elapsed = time.time() - since
-        logger.info('Training complete in {:.0f}m {:.0f}s'.format(
-            time_elapsed // 60, time_elapsed % 60))
-        logger.info('Best val Acc: {:.4f} Best val loss: {:.4f}'.format(best_acc, best_loss))
+        logger.info(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+        logger.info(f'Best val Acc: {best_acc:.4f} Best val loss: {best_loss:.4f}')
 
         self.model.load_state_dict(best_model_wts)
         return self.model, best_loss, best_acc, time_elapsed, test_acc_history, test_loss_history

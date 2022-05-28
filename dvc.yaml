@@ -26,11 +26,18 @@ stages:
       - data/processed/train_data/
 
   train_model:
-      cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml models/model.pt
+      cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml models/resnet
       deps:
         - src/models/train.py
         - data/processed/train_data/
         - src/models/configs/resnet.yaml
       outs:
-        - models/model.pt
+        - models/resnet
+  validate_model:
+      cmd: python3 src/models/validate.py  models/resnet/data/model.pth data/processed/train_data/val src/models/configs/resnet.yaml
+      deps:
+        - src/models/validate.py
+        - models/resnet/data/model.pth
+        - data/processed/train_data/val
+
 
