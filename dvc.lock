@@ -49,20 +49,34 @@ stages:
       nfiles: 4070
   train_model:
     cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml
-      models/model.pt
+      models/resnet
     deps:
     - path: data/processed/train_data/
       md5: c4ab15ee0120ceeb17dc74d89629e324.dir
       size: 16530640
       nfiles: 4070
     - path: src/models/configs/resnet.yaml
-      md5: e4cd9bc424421e6824a4abe4934c62d7
-      size: 66
+      md5: b0adfe1f9b92f9a213e4ce805da006cc
+      size: 65
     - path: src/models/train.py
       md5: e1ac17ce2ab3a95feca120a2b71ad59c
       size: 3275
     outs:
-    - path: models/model.pt
-      md5: dd90b32fb7abe50aa13f13143de7db45.dir
+    - path: models/resnet
+      md5: 955e6d52c80512a378f7af2439c2a884.dir
       size: 94392651
       nfiles: 6
+  validate_model:
+    cmd: python3 src/models/validate.py  models/resnet/data/model.pth data/processed/train_data/val
+      src/models/configs/resnet.yaml
+    deps:
+    - path: data/processed/train_data/val
+      md5: 55050f293241abaf10a24c9b68a0e9ae.dir
+      size: 1555749
+      nfiles: 407
+    - path: models/resnet/data/model.pth
+      md5: e50487325f5b600d02e0c86f59e3a0f6
+      size: 94391809
+    - path: src/models/validate.py
+      md5: 15d9860f8967ec6face19c177b7387d6
+      size: 2725
