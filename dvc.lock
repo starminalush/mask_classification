@@ -40,21 +40,21 @@ stages:
       size: 16469041
       nfiles: 4072
     - path: src/models/train_test_split.py
-      md5: 8730db837bbaed3bd6ce422d782fc806
-      size: 1469
+      md5: 109280a5306c05030fbd4d82ff04d5a0
+      size: 1891
     outs:
     - path: data/processed/train_data/
-      md5: 3faae727f6da9289ee7ae65ae8823093.dir
-      size: 16469041
-      nfiles: 4072
+      md5: c4ab15ee0120ceeb17dc74d89629e324.dir
+      size: 16530640
+      nfiles: 4070
   train_model:
     cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml
       models/model.pt
     deps:
     - path: data/processed/train_data/
-      md5: 3faae727f6da9289ee7ae65ae8823093.dir
-      size: 16469041
-      nfiles: 4072
+      md5: c4ab15ee0120ceeb17dc74d89629e324.dir
+      size: 16530640
+      nfiles: 4070
     - path: src/models/configs/resnet.yaml
       md5: e4cd9bc424421e6824a4abe4934c62d7
       size: 66
@@ -63,6 +63,6 @@ stages:
       size: 3275
     outs:
     - path: models/model.pt
-      md5: 38d515cdb36a046b2c5941ff73d73a05.dir
+      md5: dd90b32fb7abe50aa13f13143de7db45.dir
       size: 94392651
       nfiles: 6
