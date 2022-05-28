@@ -9,11 +9,28 @@ stages:
       - data/interim/annotations.csv
 
   create_crop_dataset:
-    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/raw/images/  data/processed/cropped_images/sud
+    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/raw/images/  data/processed/cropped_images/
     deps:
       - data/interim/annotations.csv
       - data/raw/images
       - src/data/create_crop_dataset.py
     outs:
       - data/processed/cropped_images
+
+  train_test_split:
+    cmd: python3 src/models/train_test_split.py data/processed/cropped_images/ data/processed/train_data/
+    deps:
+      - data/processed/cropped_images/
+      - src/models/train_test_split.py
+    outs:
+      - data/processed/train_data/
+
+  train_model:
+      cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml models/model.pt
+      deps:
+        - src/models/train.py
+        - data/processed/train_data/
+        - src/models/configs/resnet.yaml
+      outs:
+        - models/model.pt
 

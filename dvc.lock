@@ -32,3 +32,37 @@ stages:
       md5: 4c0c0f8fd61e284981e3b700945b9f83.dir
       size: 16469041
       nfiles: 4072
+  train_test_split:
+    cmd: python3 src/models/train_test_split.py data/processed/cropped_images/ data/processed/train_data/
+    deps:
+    - path: data/processed/cropped_images/
+      md5: 4c0c0f8fd61e284981e3b700945b9f83.dir
+      size: 16469041
+      nfiles: 4072
+    - path: src/models/train_test_split.py
+      md5: 8730db837bbaed3bd6ce422d782fc806
+      size: 1469
+    outs:
+    - path: data/processed/train_data/
+      md5: 3faae727f6da9289ee7ae65ae8823093.dir
+      size: 16469041
+      nfiles: 4072
+  train_model:
+    cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml
+      models/model.pt
+    deps:
+    - path: data/processed/train_data/
+      md5: 3faae727f6da9289ee7ae65ae8823093.dir
+      size: 16469041
+      nfiles: 4072
+    - path: src/models/configs/resnet.yaml
+      md5: e4cd9bc424421e6824a4abe4934c62d7
+      size: 66
+    - path: src/models/train.py
+      md5: e1ac17ce2ab3a95feca120a2b71ad59c
+      size: 3275
+    outs:
+    - path: models/model.pt
+      md5: 38d515cdb36a046b2c5941ff73d73a05.dir
+      size: 94392651
+      nfiles: 6

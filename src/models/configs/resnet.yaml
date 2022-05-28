@@ -1,0 +1,4 @@
+model_name:  'resnet'
+num_classes: 3
+batch_size: 1024
+num_epochs: 1
