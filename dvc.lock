@@ -4,31 +4,31 @@ stages:
     cmd: python3 src/data/make_dataset.py data/raw/annotations data/interim/annotations.csv
     deps:
     - path: data/raw/annotations
-      md5: 0823441f6a356807b7eff1b6ac6a56fa.dir
-      size: 1639168
-      nfiles: 1706
+      md5: 3adb0ed65147d9ea49f863bc06b7bdcd.dir
+      size: 1576046
+      nfiles: 853
     - path: src/data/make_dataset.py
       md5: 0d03c32a5b532ff4b73be024bea43202
       size: 2671
     outs:
     - path: data/interim/annotations.csv
-      md5: 88ce7ceff5abe90f569f0927cbfd5cbc
+      md5: 23930ef35eae8a5ad4c573a056289310
       size: 200129
   create_crop_dataset:
     cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/raw/images/  data/processed/cropped_images/
     deps:
     - path: data/interim/annotations.csv
-      md5: 88ce7ceff5abe90f569f0927cbfd5cbc
+      md5: 23930ef35eae8a5ad4c573a056289310
       size: 200129
     - path: data/raw/images
-      md5: 36a5c7dc82b92f7ff6c55808764b3799.dir
-      size: 416374384
-      nfiles: 1706
+      md5: 354962b3b72da69dc64ca74fd428a5a7.dir
+      size: 416311262
+      nfiles: 853
     - path: src/data/create_crop_dataset.py
-      md5: 0c17b1c8db04939d30bd0f7f26a556e6
-      size: 1344
+      md5: 6435b44f9a319de1c5dbe72f6e564382
+      size: 1307
     outs:
     - path: data/processed/cropped_images
-      md5: 18c5821f0ff70c6f268e6b2218febcdf.dir
+      md5: 4c0c0f8fd61e284981e3b700945b9f83.dir
       size: 16469041
       nfiles: 4072
