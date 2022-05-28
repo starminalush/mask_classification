@@ -1,0 +1,50 @@
+version: "2.4"
+services:
+  minio:
+    image: minio/minio:latest
+    hostname: minio
+    container_name: minio
+    restart: always
+    volumes:
+      - ./minio/data/:/data
+      - ./minio/conf/:/root/.minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ACCESS_KEY: ${AWS_ACCESS_KEY_ID}
+      MINIO_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY}
+    command: server --console-address :9001 /data
+
+
+
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /data/postgres
+    volumes:
+      - ./postgres:/data/postgres
+    ports:
+      - "5432:5432"
+
+
+  mlflow:
+    restart: always
+    build: ./mlflow/
+    container_name: mlflow_server
+    depends_on:
+      - postgres
+      - minio
+    ports:
+      - "5000:5000"
+    environment:
+      AWS_ACCESS_KEY_ID: 's3keys3key'
+      AWS_SECRET_ACCESS_KEY: 's3keys3key'
+      MLFLOW_S3_ENDPOINT_URL: 'http://127.0.0.1:9000'
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --default-artifact-root s3://trainedmodels/ --host 0.0.0.0
