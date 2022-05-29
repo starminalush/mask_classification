@@ -1,13 +1,14 @@
-import time
 import copy
 import math
+import time
+
 import torch
+import torchvision.models
+from loguru import logger
+import timm
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
-
-import torchvision.models
-from loguru import logger
 
 '''
 available model name: resnet, mobilenet, shufflenet
@@ -15,13 +16,13 @@ available model name: resnet, mobilenet, shufflenet
 
 
 class Trainer:
-    def __init__(self, model_name: str,  num_epochs: int, dataloaders,  device='cuda'):
+    def __init__(self, model_name: str, num_epochs: int, dataloaders, device='cuda'):
         self.model = Trainer.load_model(model_name=model_name)
         self.num_epochs = num_epochs
         self.dataloaders = dataloaders
         self.device = torch.device(device)
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(self.model.fc.parameters(), lr=0.001, momentum=0.9)
+        self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
         self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=7, gamma=0.1)
 
     @staticmethod
@@ -29,13 +30,20 @@ class Trainer:
         model = None
         if model_name == 'resnet':
             model = torchvision.models.resnet50(pretrained=pretrained)
+            num_ftrs = model.fc.in_features
+            model.fc = nn.Linear(num_ftrs, 3)
         if model_name == 'mobilenet':
-            model = torchvision.models.mobilenet_v3_small(pretrained=pretrained)
-
-        for param in model.parameters():
-            param.requires_grad = False
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, 3)
+            model = torchvision.models.mobilenet_v2(pretrained=pretrained)
+            for params in list(model.parameters())[0:-5]:
+                params.requires_grad = False
+            num_ftrs = model.classifier[-1].in_features
+            model.classifier = nn.Sequential(
+                nn.Dropout(p=0.2, inplace=False),
+                nn.Linear(in_features=num_ftrs, out_features=3, bias=True)
+            )
+        if model_name == 'vit_timm':
+            model = timm.create_model(" ", pretrained=True)
+            model.head = nn.Linear(model.head.in_features, 3)
         model = model.to(device)
         return model
 
@@ -48,7 +56,7 @@ class Trainer:
         best_acc = 0.
 
         for epoch in tqdm(range(self.num_epochs)):
-            logger.debug('Epoch {}/{}'.format(epoch, self.num_epochs - 1))
+            logger.debug(f'Epoch {epoch}/{self.num_epochs - 1}')
             logger.debug('-' * 10)
 
             for phase in ['train', 'test']:
@@ -103,5 +111,3 @@ class Trainer:
 
         self.model.load_state_dict(best_model_wts)
         return self.model, best_loss, best_acc, time_elapsed, test_acc_history, test_loss_history
-
-

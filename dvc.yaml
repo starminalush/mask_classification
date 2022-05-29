@@ -26,18 +26,18 @@ stages:
       - data/processed/train_data/
 
   train_model:
-      cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/resnet.yaml models/resnet
+      cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/nn_config.yaml models/nn_model
       deps:
         - src/models/train.py
         - data/processed/train_data/
-        - src/models/configs/resnet.yaml
+        - src/models/configs/nn_config.yaml
       outs:
-        - models/resnet
+        - models/nn_model
   validate_model:
-      cmd: python3 src/models/validate.py  models/resnet/data/model.pth data/processed/train_data/val src/models/configs/resnet.yaml
+      cmd: python3 src/models/validate.py  models/nn_model/data/model.pth data/processed/train_data/val src/models/configs/nn_config.yaml
       deps:
         - src/models/validate.py
-        - models/resnet/data/model.pth
+        - models/nn_model/data/model.pth
         - data/processed/train_data/val
 
 

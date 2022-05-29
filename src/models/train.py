@@ -56,7 +56,7 @@ def main(dataset_path: str, config_path: str, model_path: str):
     logger.info(f'test image size: {len(dataloaders["test"].dataset)}')
 
     trainer = Trainer(model_name=config['model_name'], num_epochs=config['num_epochs'], dataloaders=dataloaders)
-    experiment_id = mlflow.set_experiment('resnet_v0').experiment_id
+    experiment_id = mlflow.set_experiment(config['model_name']).experiment_id
     with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_param('dataset', dataset_path)
         mlflow.log_param('model name', config['model_name'])
@@ -67,7 +67,7 @@ def main(dataset_path: str, config_path: str, model_path: str):
         mlflow.log_param('Training time', training_time)
         mlflow.log_param('Best val Acc', float(best_acc))
         mlflow.log_param('Best loss', best_loss)
-        mlflow.pytorch.log_model(model, 'resnet18', registered_model_name="resnet18")
+        mlflow.pytorch.log_model(model, config['model_name'], registered_model_name=config['model_name'])
         mlflow.pytorch.save_model(model, model_path)
         for i in range(len(test_loss_history)):
             mlflow.log_metric('loss', test_loss_history[i])

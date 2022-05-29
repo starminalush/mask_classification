@@ -16,6 +16,7 @@ mlflow = "^1.26.0"
 python-dotenv = "^0.20.0"
 PyYAML = "^6.0"
 pylint = "^2.13.9"
+timm = "^0.5.4"
 
 [tool.poetry.dev-dependencies]
 pandas = "^1.4.2"
