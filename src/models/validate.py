@@ -63,7 +63,7 @@ def main(model_path: str, validation_dataset: str, config_path: str):
     logger.debug(f'precision: {precision}')
     logger.debug(f'recall: {recall}')
 
-    experiment_id = mlflow.set_experiment('resnet_v0').experiment_id
+    experiment_id = mlflow.set_experiment(config['model_name']).experiment_id
     with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_metric('accuracy', accuracy)
         mlflow.log_metric('f1', f1)
