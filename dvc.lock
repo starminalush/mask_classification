@@ -1,9 +1,9 @@
 schema: '2.0'
 stages:
   make_dataset:
-    cmd: python3 src/data/make_dataset.py data/raw/annotations data/interim/annotations.csv
+    cmd: python3 src/data/make_dataset.py data/external/annotations data/interim/annotations.csv
     deps:
-    - path: data/raw/annotations
+    - path: data/external/annotations
       md5: 3adb0ed65147d9ea49f863bc06b7bdcd.dir
       size: 1576046
       nfiles: 853
@@ -15,68 +15,89 @@ stages:
       md5: 23930ef35eae8a5ad4c573a056289310
       size: 200129
   create_crop_dataset:
-    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/raw/images/  data/processed/cropped_images/
+    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/external/images/  data/processed/cropped_images/
     deps:
-    - path: data/interim/annotations.csv
-      md5: 23930ef35eae8a5ad4c573a056289310
-      size: 200129
-    - path: data/raw/images
+    - path: data/external/images
       md5: 354962b3b72da69dc64ca74fd428a5a7.dir
       size: 416311262
       nfiles: 853
+    - path: data/interim/annotations.csv
+      md5: 23930ef35eae8a5ad4c573a056289310
+      size: 200129
     - path: src/data/create_crop_dataset.py
-      md5: 6435b44f9a319de1c5dbe72f6e564382
-      size: 1307
+      md5: 50de737db8dfa8aa6c6e3e27a32f58a1
+      size: 1384
     outs:
     - path: data/processed/cropped_images
-      md5: 4c0c0f8fd61e284981e3b700945b9f83.dir
+      md5: 8859ced0fc987ff3a43c0e6c2f8ad564.dir
       size: 16469041
       nfiles: 4072
   train_test_split:
-    cmd: python3 src/models/train_test_split.py data/processed/cropped_images/ data/processed/train_data/
+    cmd: python3 src/models/train_test_split.py data/processed/unsplit_train_data/
+      data/processed/train_data/
     deps:
-    - path: data/processed/cropped_images/
-      md5: 4c0c0f8fd61e284981e3b700945b9f83.dir
-      size: 16469041
-      nfiles: 4072
+    - path: data/processed/unsplit_train_data/
+      md5: beee1c86fd82d2f306173ee7aa628f47.dir
+      size: 187211808
+      nfiles: 8167
     - path: src/models/train_test_split.py
-      md5: 109280a5306c05030fbd4d82ff04d5a0
-      size: 1891
+      md5: 36a978893ef44198a71e9a62da7f3721
+      size: 1866
     outs:
     - path: data/processed/train_data/
-      md5: c4ab15ee0120ceeb17dc74d89629e324.dir
-      size: 16530640
-      nfiles: 4070
+      md5: 49c1bc41c2299d8f34719f980348d667.dir
+      size: 186994070
+      nfiles: 8167
   train_model:
     cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/nn_config.yaml
       models/nn_model
     deps:
     - path: data/processed/train_data/
-      md5: c4ab15ee0120ceeb17dc74d89629e324.dir
-      size: 16530640
-      nfiles: 4070
+      md5: 49c1bc41c2299d8f34719f980348d667.dir
+      size: 186994070
+      nfiles: 8167
     - path: src/models/configs/nn_config.yaml
-      md5: 0729cfa91089280d25a9ccae7aa916c1
-      size: 67
+      md5: 9b6d4b0edf2388d8e77d35c87aa5c78a
+      size: 128
     - path: src/models/train.py
       md5: 0a0276879b7af2a802bad04e427d9d22
       size: 3304
     outs:
     - path: models/nn_model
-      md5: 41956fe3e612cc138470cb6dbf516b99.dir
-      size: 343281419
+      md5: 301d70ac7cbda0d8cb806c8117f23001.dir
+      size: 9179223
       nfiles: 6
   validate_model:
     cmd: python3 src/models/validate.py  models/nn_model/data/model.pth data/processed/train_data/val
       src/models/configs/nn_config.yaml
     deps:
     - path: data/processed/train_data/val
-      md5: 55050f293241abaf10a24c9b68a0e9ae.dir
-      size: 1555749
-      nfiles: 407
+      md5: 20d6dadeb6006539a476bce01d3a1170.dir
+      size: 17831526
+      nfiles: 817
     - path: models/nn_model/data/model.pth
-      md5: f301b4952598dcff5c1db30fa23e2e23
-      size: 343280593
+      md5: de9f99818073817b4cf2b9a940fe2dc0
+      size: 9178381
     - path: src/models/validate.py
-      md5: 15d9860f8967ec6face19c177b7387d6
-      size: 2725
+      md5: 1cb2d85efb92a2ad384d082621079040
+      size: 2734
+  merge_datasets:
+    cmd: python3 src/data/mix_datasets.py data/raw/raw_data/ data/processed/cropped_images/
+      data/processed/unsplit_train_data/
+    deps:
+    - path: data/processed/cropped_images/
+      md5: 8859ced0fc987ff3a43c0e6c2f8ad564.dir
+      size: 16469041
+      nfiles: 4072
+    - path: data/raw/raw_data/
+      md5: 086383ff30521a59be47dc3ea9872326.dir
+      size: 170742767
+      nfiles: 4095
+    - path: src/data/mix_datasets.py
+      md5: fd9ea985e7232c94c359540caf474d71
+      size: 997
+    outs:
+    - path: data/processed/unsplit_train_data/
+      md5: beee1c86fd82d2f306173ee7aa628f47.dir
+      size: 187211808
+      nfiles: 8167

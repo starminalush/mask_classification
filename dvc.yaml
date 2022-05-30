@@ -1,43 +1,52 @@
 stages:
 
   make_dataset:
-    cmd: python3 src/data/make_dataset.py data/raw/annotations data/interim/annotations.csv
+    cmd: python3 src/data/make_dataset.py data/external/annotations data/interim/annotations.csv
     deps:
-      - data/raw/annotations
+      - data/external/annotations
       - src/data/make_dataset.py
     outs:
       - data/interim/annotations.csv
 
   create_crop_dataset:
-    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/raw/images/  data/processed/cropped_images/
+    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/external/images/  data/processed/cropped_images/
     deps:
       - data/interim/annotations.csv
-      - data/raw/images
+      - data/external/images
       - src/data/create_crop_dataset.py
     outs:
       - data/processed/cropped_images
 
-  train_test_split:
-    cmd: python3 src/models/train_test_split.py data/processed/cropped_images/ data/processed/train_data/
+  merge_datasets:
+    cmd: python3 src/data/mix_datasets.py data/raw/raw_data/ data/processed/cropped_images/ data/processed/unsplit_train_data/
     deps:
+      - data/raw/raw_data/
       - data/processed/cropped_images/
+      - src/data/mix_datasets.py
+    outs:
+      - data/processed/unsplit_train_data/
+
+  train_test_split:
+    cmd: python3 src/models/train_test_split.py data/processed/unsplit_train_data/ data/processed/train_data/
+    deps:
+      - data/processed/unsplit_train_data/
       - src/models/train_test_split.py
     outs:
       - data/processed/train_data/
 
   train_model:
-      cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/nn_config.yaml models/nn_model
-      deps:
-        - src/models/train.py
-        - data/processed/train_data/
-        - src/models/configs/nn_config.yaml
-      outs:
-        - models/nn_model
+    cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/nn_config.yaml models/nn_model
+    deps:
+      - src/models/train.py
+      - data/processed/train_data/
+      - src/models/configs/nn_config.yaml
+    outs:
+      - models/nn_model
   validate_model:
-      cmd: python3 src/models/validate.py  models/nn_model/data/model.pth data/processed/train_data/val src/models/configs/nn_config.yaml
-      deps:
-        - src/models/validate.py
-        - models/nn_model/data/model.pth
-        - data/processed/train_data/val
+    cmd: python3 src/models/validate.py  models/nn_model/data/model.pth data/processed/train_data/val src/models/configs/nn_config.yaml
+    deps:
+      - src/models/validate.py
+      - models/nn_model/data/model.pth
+      - data/processed/train_data/val
 
 

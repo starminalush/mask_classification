@@ -10,7 +10,7 @@ from loguru import logger
 @click.argument('input_datadir', type=click.Path(exists=True))
 @click.argument('output_datadir', type=click.Path())
 def main(input_datadir: str, output_datadir: str):
-    classes_dir = ['mask_weared_incorrect', 'with_mask', 'without_mask']
+    classes_dir = ['with_mask', 'without_mask']
 
     test_ratio = 0.20
     val_ratio = 0.10
