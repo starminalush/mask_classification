@@ -12,10 +12,20 @@ loguru = "^0.6.0"
 opencv-python = "^4.5.5"
 torch = "^1.11.0"
 torchvision = "^0.12.0"
+mlflow = "^1.26.0"
+python-dotenv = "^0.20.0"
+PyYAML = "^6.0"
+pylint = "^2.13.9"
+timm = "^0.5.4"
 
 [tool.poetry.dev-dependencies]
 pandas = "^1.4.2"
 tqdm = "^4.64.0"
+torchvision = "^0.12.0"
+torch = "^1.11.0"
+pytorch-lightning = "^1.6.3"
+torchmetrics = "^0.8.2"
+sklearn = "^0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
