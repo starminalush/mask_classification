@@ -1,5 +1,5 @@
 #возможные модели vit_timm, resnet, mobilenet
-model_name: 'vit_timm'
+model_name: 'mobilenet'
 num_classes: 3
 batch_size: 16
 num_epochs: 3

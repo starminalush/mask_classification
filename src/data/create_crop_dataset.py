@@ -20,6 +20,8 @@ def main(clean_annotation_filepath: str, inputdir_filepath: str, outputdir_filep
         current_row = row[1]
         image = cv2.imread(f"{inputdir_filepath}/{current_row['file']}.png")
         label: str = current_row['name']
+        if label == 'mask_weared_incorrect':
+            label = 'with_mask'
         if not os.path.exists(f"{outputdir_filepath}/{label}"):
             os.mkdir(f"{outputdir_filepath}/{label}")
         x_min: int = current_row['xmin']
