@@ -1,0 +1,8 @@
+[core]
+    remote = myremoteminio
+    autostage = true
+['remote "myremoteminio"']
+    url = s3://dataset
+    endpointurl = http://0.0.0.0:9000
+    access_key_id = s3keys3key
+    secret_access_key = s3keys3key

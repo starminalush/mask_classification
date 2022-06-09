@@ -1,6 +1,7 @@
 import copy
 import math
 import time
+import typing
 
 import timm
 import torch
@@ -10,45 +11,58 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-"""
-available model name: resnet, mobilenet, shufflenet
-"""
-
 
 class Trainer:
     def __init__(self, model_name: str, num_epochs: int, dataloaders, device="cuda"):
-        self.model = Trainer.load_model(model_name=model_name)
-        self.num_epochs = num_epochs
-        self.dataloaders = dataloaders
+        """
+        create trainer class object
+        @param model_name: model name. Available model names: mobilenet, resnet, vit_timm
+        @type model_name: str
+        @param num_epochs: amount of epochs
+        @type num_epochs: int
+        @param dataloaders: train and test dataloaders
+        @type dataloaders: dict
+        @param device: nvidia gpu device
+        @type device: str
+        """
+        self.model: nn.Module = Trainer.load_model(model_name=model_name)
+        self.num_epochs: int = num_epochs
+        self.dataloaders: typing.Dict = dataloaders
         self.device = torch.device(device)
+        # default criterion
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-        self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=7, gamma=0.1)
+        # default optimizer
+        self.optimizer:optim.Optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
+        # default lr
+        self.scheduler = lr_scheduler.StepLR(optimizer=self.optimizer, step_size=7, gamma=0.1)
+        logger.error(type(self.scheduler))
+        logger.error(type(self.criterion))
+        logger.error(self.device)
 
     @staticmethod
-    def load_model(model_name: str, pretrained=True, device="cuda"):
+    def load_model(model_name: str, pretrained=True, device="cuda") -> nn.Module:
         model = None
         if model_name == "resnet":
-            model = torchvision.models.resnet50(pretrained=pretrained)
-            num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, 2)
+            model: nn.Module = torchvision.models.resnet50(pretrained=pretrained)
+            num_ftrs: int = model.fc.in_features
+            model.fc: nn.Linear = nn.Linear(num_ftrs, 2)
         if model_name == "mobilenet":
-            model = torchvision.models.mobilenet_v2(pretrained=pretrained)
+            model: nn.Module = torchvision.models.mobilenet_v2(pretrained=pretrained)
             for params in list(model.parameters())[0:-5]:
                 params.requires_grad = False
-            num_ftrs = model.classifier[-1].in_features
-            model.classifier = nn.Sequential(
+            num_ftrs: int = model.classifier[-1].in_features
+            model.classifier: nn.Sequential = nn.Sequential(
                 nn.Dropout(p=0.2, inplace=False),
                 nn.Linear(in_features=num_ftrs, out_features=2, bias=True),
             )
         if model_name == "vit_timm":
-            model = timm.create_model(" ", pretrained=True)
-            model.head = nn.Linear(model.head.in_features, 2)
+            model: nn.Module = timm.create_model(" ", pretrained=True)
+            model.head: nn.Linear = nn.Linear(model.head.in_features, 2)
         model = model.to(device)
         return model
 
     def train(self):
-        since = time.time()
+        since:time = time.time()
         best_model_wts = copy.deepcopy(self.model.state_dict())
         best_loss = math.inf
         test_acc_history = []

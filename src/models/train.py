@@ -1,4 +1,5 @@
 import os
+import typing
 
 import click
 import mlflow
@@ -8,26 +9,40 @@ import yaml
 from dotenv import load_dotenv
 from loguru import logger
 from torchvision import transforms, datasets
+from typing import List, Dict
 
 from trainer import Trainer
 
 load_dotenv()
-os.environ["MLFLOW_TRACKING_URI"] = "http://0.0.0.0:5000"
-os.environ["MLFLOW_S3_ENDPOINT_URL"] = "http://0.0.0.0:9000"
-os.environ["AWS_ACCESS_KEY_ID"] = "s3keys3key"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "s3keys3key"
-mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
+# os.environ["MLFLOW_TRACKING_URI"] = os.getenv("MLFLOW_TRACKING_URI")
+# os.environ["MLFLOW_S3_ENDPOINT_URL"] = os.getenv("MINIO_URI")
+# os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("MINIO_ROOT_USER")
+# os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("MINIO_ROOT_PASSWORD")
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
 
 
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
-@click.argument("data_type", type=click.STRING)
+@click.argument("dataset_type", type=click.STRING)
 @click.argument("config_path", type=click.Path(exists=True))
 @click.argument("model_path", type=click.Path())
-def main(dataset_path: str, config_path: str, data_type: str, model_path: str):
+def main(dataset_path: str, config_path: str, dataset_type: str, model_path: str):
+    """
+    train model
+    @param dataset_path: dataset path(external, internal or both)
+    @type dataset_path: str
+    @param config_path: config for neural network in .yaml format
+    @type config_path: str
+    @param dataset_type: dataset type(external, internal or both)
+    @type dataset_type: str
+    @param model_path: path for model saving
+    @type model_path: str
+    """
     with open(config_path, "r", encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
-    data_transforms = {
+
+    # create dataset and dataloaders
+    data_transforms:Dict = {
         "train": transforms.Compose(
             [
                 transforms.RandomRotation(5),
@@ -48,31 +63,31 @@ def main(dataset_path: str, config_path: str, data_type: str, model_path: str):
         ),
     }
 
-    image_datasets = {
-        x: datasets.ImageFolder(os.path.join(dataset_path, x), data_transforms[x])
+    image_datasets: Dict = {
+        x: datasets.ImageFolder(root=os.path.join(dataset_path, x), target_transform=data_transforms[x])
         for x in ["train", "test"]
     }
 
-    dataloaders = {
+    dataloaders: Dict = {
         x: torch.utils.data.DataLoader(
-            image_datasets[x], batch_size=4, shuffle=True, num_workers=4
+            dataset=image_datasets[x], batch_size=4, shuffle=True, num_workers=4
         )
         for x in ["train", "test"]
     }
 
-    class_names = image_datasets["train"].classes
+    class_names: List = image_datasets["train"].classes
     logger.info("---DATASET INFO---")
     logger.info(f"classes {class_names}")
     logger.info(f'train image size: {len(dataloaders["train"].dataset)}')
     logger.info(f'test image size: {len(dataloaders["test"].dataset)}')
-    logger.info(f"data type {data_type}")
+    logger.info(f"dataset type {dataset_type}")
 
-    trainer = Trainer(
+    trainer: Trainer = Trainer(
         model_name=config["model_name"],
         num_epochs=config["num_epochs"],
         dataloaders=dataloaders,
     )
-    experiment_id = mlflow.set_experiment(config["model_name"]).experiment_id
+    experiment_id: str = mlflow.set_experiment(config["model_name"]).experiment_id
     with mlflow.start_run(experiment_id=experiment_id):
         mlflow.log_param("dataset", dataset_path)
         mlflow.log_param("model name", config["model_name"])

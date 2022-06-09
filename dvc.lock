@@ -26,3 +26,88 @@ stages:
     - path: data/interim/annotations.csv
       md5: 23930ef35eae8a5ad4c573a056289310
       size: 200129
+  create_crop_dataset_external:
+    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/external/face-mask-detection/images/  data/processed/cropped_images/
+    deps:
+    - path: data/external/face-mask-detection/images
+      md5: 354962b3b72da69dc64ca74fd428a5a7.dir
+      size: 416311262
+      nfiles: 853
+    - path: data/interim/annotations.csv
+      md5: 23930ef35eae8a5ad4c573a056289310
+      size: 200129
+    - path: src/data/create_crop_dataset.py
+      md5: af39756da35f8c59a1b491e58eee2c77
+      size: 2023
+    outs:
+    - path: data/processed/cropped_images
+      md5: 8859ced0fc987ff3a43c0e6c2f8ad564.dir
+      size: 16469041
+      nfiles: 4072
+  train_test_split@0:
+    cmd: python3 src/models/train_test_split.py data/raw/raw_data/ internal data/processed/train_data_internal/
+    deps:
+    - path: data/raw/raw_data/
+      md5: 086383ff30521a59be47dc3ea9872326.dir
+      size: 170742767
+      nfiles: 4095
+    - path: src/models/train_test_split.py
+      md5: b4c29ed4952832d65c677d401a7e7bdc
+      size: 2209
+    outs:
+    - path: data/processed/train_data_internal/
+      md5: eb0da0fa6b873f9fa2fca3c6034a5e13.dir
+      size: 170742767
+      nfiles: 4095
+  merge_datasets:
+    cmd: python3 src/data/mix_datasets.py data/raw/raw_data/ data/processed/cropped_images/
+      data/processed/unsplit_train_data/
+    deps:
+    - path: data/processed/cropped_images/
+      md5: 8859ced0fc987ff3a43c0e6c2f8ad564.dir
+      size: 16469041
+      nfiles: 4072
+    - path: data/raw/raw_data/
+      md5: 086383ff30521a59be47dc3ea9872326.dir
+      size: 170742767
+      nfiles: 4095
+    - path: src/data/mix_datasets.py
+      md5: 5b768626f2ead57d2a74ecd7bfde334a
+      size: 1467
+    outs:
+    - path: data/processed/unsplit_train_data/
+      md5: beee1c86fd82d2f306173ee7aa628f47.dir
+      size: 187211808
+      nfiles: 8167
+  train_test_split@1:
+    cmd: python3 src/models/train_test_split.py data/processed/cropped_images/ external
+      data/processed/train_data_external/
+    deps:
+    - path: data/processed/cropped_images/
+      md5: 8859ced0fc987ff3a43c0e6c2f8ad564.dir
+      size: 16469041
+      nfiles: 4072
+    - path: src/models/train_test_split.py
+      md5: b4c29ed4952832d65c677d401a7e7bdc
+      size: 2209
+    outs:
+    - path: data/processed/train_data_external/
+      md5: 8fbb49affd754f6c6f0ed7b97d0f5927.dir
+      size: 16469041
+      nfiles: 4072
+  train_test_split@2:
+    cmd: python3 src/models/train_test_split.py data/processed/unsplit_train_data/
+      both data/processed/train_data_both/
+    deps:
+    - path: data/processed/unsplit_train_data/
+      md5: beee1c86fd82d2f306173ee7aa628f47.dir
+      size: 187211808
+      nfiles: 8167
+    - path: src/models/train_test_split.py
+      md5: b4c29ed4952832d65c677d401a7e7bdc
+      size: 2209
+    outs:
+    - path: data/processed/train_data_both/
+      md5: f614e6d2eec92ac75a7a6b8dbc8207f5.dir
+      size: 187211808
+      nfiles: 8167

@@ -1,19 +1,26 @@
 import glob
 import xml.etree.ElementTree as ET
+from typing import Dict
 
 import click
-import pandas as pd
 from loguru import logger
+from pandas import DataFrame
 
 
 @click.command()
 @click.argument("annotation_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
-def main(annotation_filepath, output_filepath):
-    """Runs data processing scripts to turn raw data from (../raw) into
-    cleaned data ready to be analyzed (saved in ../processed).
+def main(annotation_filepath: str, output_filepath: str):
     """
-    dataset = {
+    Runs data processing scripts to turn raw data from (../raw) into
+    cleaned data ready to be analyzed (saved in ../processed).
+
+    @param annotation_filepath: raw annotation file
+    @type annotation_filepath: str
+    @param output_filepath: clean annotation file
+    @type output_filepath: str
+    """
+    dataset: Dict = {
         "xmin": [],
         "ymin": [],
         "xmax": [],
@@ -25,7 +32,7 @@ def main(annotation_filepath, output_filepath):
     }
 
     for anno in glob.glob(annotation_filepath + "/*.xml"):
-        tree = ET.parse(anno)
+        tree: ET = ET.parse(anno)
 
         for elem in tree.iter():
             if "size" in elem.tag:
@@ -63,7 +70,7 @@ def main(annotation_filepath, output_filepath):
                                 ymax = int(round(float(dim.text)))
                                 ymax = ymax if ymax > 0 else 0
                                 dataset["ymax"] += [ymax]
-    data = pd.DataFrame(dataset)
+    data: DataFrame = DataFrame(dataset)
     data.to_csv(output_filepath, index=False)
     logger.info("making final data set from raw data")
 

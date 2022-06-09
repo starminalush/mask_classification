@@ -1,4 +1,5 @@
 stages:
+
   download_external_dataset:
     cmd: python3 src/data/download_dataset.py data/external/face-mask-detection
     deps:
