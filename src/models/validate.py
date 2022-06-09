@@ -22,8 +22,9 @@ mlflow.set_tracking_uri(os.environ['MLFLOW_TRACKING_URI'])
 @click.command()
 @click.argument('model_path', type=click.Path(exists=True))
 @click.argument('validation_dataset', type=click.Path(exists=True))
+@click.argument('data_type', type=click.STRING)
 @click.argument('config_path', type=click.Path(exists=True))
-def main(model_path: str, validation_dataset: str, config_path: str):
+def main(model_path: str, validation_dataset: str, data_type: str, config_path: str):
     with open(config_path, 'r', encoding='utf-8') as stream:
         config = yaml.safe_load(stream)
     model = torch.load(model_path)
@@ -37,8 +38,9 @@ def main(model_path: str, validation_dataset: str, config_path: str):
     image_dataset = datasets.ImageFolder(validation_dataset,
                                          data_transforms)
 
-    image_dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=1,
-                                                   shuffle=True, num_workers=1)
+    logger.info(image_dataset.classes)
+
+    image_dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=1, num_workers=1)
 
     y_predicted = []
     y_gt = []
@@ -50,14 +52,14 @@ def main(model_path: str, validation_dataset: str, config_path: str):
             labels = labels.to('cuda')
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
-            y_gt.append(labels.size(0))
+            y_gt.append(labels.item())
             y_predicted.append(predicted.item())
 
     accuracy = accuracy_score(y_gt, y_predicted)
     f1 = f1_score(y_gt, y_predicted, average='weighted')
     precision = precision_score(y_gt, y_predicted, average='weighted')
     recall = recall_score(y_gt, y_predicted, average='weighted', zero_division=True)
-
+    logger.info(f'data type {data_type}')
     logger.debug(f'accuracy: {accuracy}')
     logger.debug(f'f1: {f1}')
     logger.debug(f'precision: {precision}')
@@ -65,6 +67,7 @@ def main(model_path: str, validation_dataset: str, config_path: str):
 
     experiment_id = mlflow.set_experiment(config['model_name']).experiment_id
     with mlflow.start_run(experiment_id=experiment_id):
+        mlflow.log_param('dataset_type', data_type)
         mlflow.log_metric('accuracy', accuracy)
         mlflow.log_metric('f1', f1)
         mlflow.log_metric('precision', precision)

@@ -1,18 +1,24 @@
 stages:
-
-  make_dataset:
-    cmd: python3 src/data/make_dataset.py data/external/annotations data/interim/annotations.csv
+  download_external_dataset:
+    cmd: python3 src/data/download_dataset.py data/external/face-mask-detection
     deps:
-      - data/external/annotations
+      - src/data/download_dataset.py
+    outs:
+      - data/external/face-mask-detection
+
+  make_dataset_external:
+    cmd: python3 src/data/make_dataset.py data/external/face-mask-detection/annotations data/interim/annotations.csv
+    deps:
+      - data/external/face-mask-detection/annotations
       - src/data/make_dataset.py
     outs:
       - data/interim/annotations.csv
 
-  create_crop_dataset:
-    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/external/images/  data/processed/cropped_images/
+  create_crop_dataset_external:
+    cmd: python3 src/data/create_crop_dataset.py data/interim/annotations.csv  data/external/face-mask-detection/images/  data/processed/cropped_images/
     deps:
       - data/interim/annotations.csv
-      - data/external/images
+      - data/external/face-mask-detection/images
       - src/data/create_crop_dataset.py
     outs:
       - data/processed/cropped_images
@@ -27,26 +33,52 @@ stages:
       - data/processed/unsplit_train_data/
 
   train_test_split:
-    cmd: python3 src/models/train_test_split.py data/processed/unsplit_train_data/ data/processed/train_data/
-    deps:
-      - data/processed/unsplit_train_data/
-      - src/models/train_test_split.py
-    outs:
-      - data/processed/train_data/
+    foreach:
+      - input_path: data/raw/raw_data/
+        data_type: internal
+      - input_path: data/processed/cropped_images/
+        data_type: external
+      - input_path: data/processed/unsplit_train_data/
+        data_type: both
+    do:
+      cmd: python3 src/models/train_test_split.py ${item.input_path} ${item.data_type} data/processed/train_data_${item.data_type}/
+      deps:
+        - ${item.input_path}
+        - src/models/train_test_split.py
+      outs:
+        - data/processed/train_data_${item.data_type}/
 
   train_model:
-    cmd: python3 src/models/train.py data/processed/train_data/ src/models/configs/nn_config.yaml models/nn_model
-    deps:
-      - src/models/train.py
-      - data/processed/train_data/
-      - src/models/configs/nn_config.yaml
-    outs:
-      - models/nn_model
-  validate_model:
-    cmd: python3 src/models/validate.py  models/nn_model/data/model.pth data/processed/train_data/val src/models/configs/nn_config.yaml
-    deps:
-      - src/models/validate.py
-      - models/nn_model/data/model.pth
-      - data/processed/train_data/val
+    foreach:
+      - dataset_path: data/processed/train_data_internal/
+        data_type: internal
+      - dataset_path: data/processed/train_data_external/
+        data_type: external
+      - dataset_path: data/processed/train_data_both
+        data_type: both
+    do:
+      cmd: python3 src/models/train.py  ${item.dataset_path} ${item.data_type} src/models/configs/nn_config.yaml models/nn_model_${item.data_type}
+      deps:
+        - ${item.dataset_path}
+        - src/models/configs/nn_config.yaml
+        - src/models/train.py
+      outs:
+        - models/nn_model_${item.data_type}
 
+  validate_model:
+    foreach:
+      - dataset_path: data/processed/train_data_internal/val/
+        data_type: internal
+      - dataset_path: data/processed/train_data_external/val/
+        data_type: external
+      - dataset_path: data/processed/train_data_both/val/
+        data_type: external
+    do:
+      cmd: python3 src/models/validate.py  models/nn_model_${item.data_type}/data/model.pth ${item.dataset_path} ${item.data_type} src/models/configs/nn_config.yaml
+      deps:
+        - models/nn_model_${item.data_type}/data/model.pth
+        - ${item.dataset_path}
+        - src/models/configs/nn_config.yaml
+
+#
 
