@@ -10,9 +10,9 @@ from loguru import logger
 @click.argument("external_dataset_filepath", type=click.Path(exists=True))
 @click.argument("train_dataset_filepath", type=click.Path())
 def main(
-        raw_dataset_filepath: str,
-        external_dataset_filepath: str,
-        train_dataset_filepath: str,
+    raw_dataset_filepath: str,
+    external_dataset_filepath: str,
+    train_dataset_filepath: str,
 ):
     if not os.path.exists(train_dataset_filepath):
         os.mkdir(train_dataset_filepath)
