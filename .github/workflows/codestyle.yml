@@ -26,6 +26,9 @@ jobs:
     steps:
     - name: Checking out code from the repository
       uses: actions/checkout@v2
+      
+    - name: Check out code with black
+      uses: psf/black@stable
     
     - name: Setting up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
