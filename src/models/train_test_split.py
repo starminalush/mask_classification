@@ -8,8 +8,9 @@ from loguru import logger
 
 @click.command()
 @click.argument('input_datadir', type=click.Path(exists=True))
+@click.argument('data_type', type=click.STRING)
 @click.argument('output_datadir', type=click.Path())
-def main(input_datadir: str, output_datadir: str):
+def main(input_datadir: str, data_type: str, output_datadir: str):
     classes_dir = ['with_mask', 'without_mask']
 
     test_ratio = 0.20
@@ -31,7 +32,7 @@ def main(input_datadir: str, output_datadir: str):
         train_filenames = [src + '/' + name for name in train_filenames.tolist()]
         test_filenames = [src + '/' + name for name in test_filenames.tolist()]
         val_filenames = [src + '/' + name for name in val_filenames.tolist()]
-
+        logger.debug(f'Start splitting dataset for type {data_type}')
         logger.debug("*****************************")
         logger.debug(f'Class {cls}')
         logger.debug(f'Total images: {len(all_filenames)}')

@@ -21,9 +21,10 @@ mlflow.set_tracking_uri(os.environ['MLFLOW_TRACKING_URI'])
 
 @click.command()
 @click.argument('dataset_path', type=click.Path(exists=True))
+@click.argument('data_type', type=click.STRING)
 @click.argument('config_path', type=click.Path(exists=True))
 @click.argument('model_path', type=click.Path())
-def main(dataset_path: str, config_path: str, model_path: str):
+def main(dataset_path: str, config_path: str, data_type:str, model_path: str):
     with open(config_path, 'r', encoding='utf-8') as stream:
         config = yaml.safe_load(stream)
     data_transforms = {
@@ -54,6 +55,7 @@ def main(dataset_path: str, config_path: str, model_path: str):
     logger.info(f"classes {class_names}")
     logger.info(f'train image size: {len(dataloaders["train"].dataset)}')
     logger.info(f'test image size: {len(dataloaders["test"].dataset)}')
+    logger.info(f'data type {data_type}')
 
     trainer = Trainer(model_name=config['model_name'], num_epochs=config['num_epochs'], dataloaders=dataloaders)
     experiment_id = mlflow.set_experiment(config['model_name']).experiment_id

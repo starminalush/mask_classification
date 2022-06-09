@@ -2,10 +2,10 @@ import copy
 import math
 import time
 
+import timm
 import torch
 import torchvision.models
 from loguru import logger
-import timm
 from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
@@ -31,7 +31,7 @@ class Trainer:
         if model_name == 'resnet':
             model = torchvision.models.resnet50(pretrained=pretrained)
             num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, 3)
+            model.fc = nn.Linear(num_ftrs, 2)
         if model_name == 'mobilenet':
             model = torchvision.models.mobilenet_v2(pretrained=pretrained)
             for params in list(model.parameters())[0:-5]:
@@ -39,11 +39,11 @@ class Trainer:
             num_ftrs = model.classifier[-1].in_features
             model.classifier = nn.Sequential(
                 nn.Dropout(p=0.2, inplace=False),
-                nn.Linear(in_features=num_ftrs, out_features=3, bias=True)
+                nn.Linear(in_features=num_ftrs, out_features=2, bias=True)
             )
         if model_name == 'vit_timm':
             model = timm.create_model(" ", pretrained=True)
-            model.head = nn.Linear(model.head.in_features, 3)
+            model.head = nn.Linear(model.head.in_features, 2)
         model = model.to(device)
         return model
 
