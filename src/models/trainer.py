@@ -1,7 +1,8 @@
 import copy
 import math
 import time
-import typing
+from typing import Dict, List
+from typing import OrderedDict
 
 import timm
 import torch
@@ -11,63 +12,88 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
+"""
+available model name: resnet, mobilenet, vit_timm
+"""
+
 
 class Trainer:
-    def __init__(self, model_name: str, num_epochs: int, dataloaders, device="cuda"):
-        """
-        create trainer class object
-        @param model_name: model name. Available model names: mobilenet, resnet, vit_timm
-        @type model_name: str
-        @param num_epochs: amount of epochs
-        @type num_epochs: int
-        @param dataloaders: train and test dataloaders
-        @type dataloaders: dict
-        @param device: nvidia gpu device
-        @type device: str
-        """
-        self.model: nn.Module = Trainer.load_model(model_name=model_name)
-        self.num_epochs: int = num_epochs
-        self.dataloaders: typing.Dict = dataloaders
-        self.device = torch.device(device)
-        # default criterion
-        self.criterion = nn.CrossEntropyLoss()
-        # default optimizer
-        self.optimizer:optim.Optimizer = optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-        # default lr
-        self.scheduler = lr_scheduler.StepLR(optimizer=self.optimizer, step_size=7, gamma=0.1)
-        logger.error(type(self.scheduler))
-        logger.error(type(self.criterion))
-        logger.error(self.device)
+    def __init__(self, config: dict, dataloaders, device="cuda"):
+        self.model: nn.Module = self.load_model(
+            model_name=config["model_name"],
+            model_classes=config["num_classes"],
+            pretrained=config["pretrained"],
+        )
+        self.num_epochs: int = config["num_epochs"]
+        self.dataloaders: Dict = dataloaders
+        self.device: torch.device = torch.device(device)
+        self.criterion: nn.modules.loss = self.load_criterion(
+            criterion_name=config["criterion"]
+        )
+        self.optimizer: optim.optimizer = self.load_optimizer(
+            optimizer_name=config["optimizer"]
+        )
+        self.scheduler: optim.lr_scheduler = self.load_scheduler(
+            scheduler_name=config["scheduler"]
+        )
 
-    @staticmethod
-    def load_model(model_name: str, pretrained=True, device="cuda") -> nn.Module:
+    def load_model(
+        self, model_name: str, model_classes: int, pretrained=True, device="cuda"
+    ):
         model = None
         if model_name == "resnet":
             model: nn.Module = torchvision.models.resnet50(pretrained=pretrained)
             num_ftrs: int = model.fc.in_features
-            model.fc: nn.Linear = nn.Linear(num_ftrs, 2)
+            model.fc = nn.Linear(num_ftrs, model_classes)
         if model_name == "mobilenet":
             model: nn.Module = torchvision.models.mobilenet_v2(pretrained=pretrained)
             for params in list(model.parameters())[0:-5]:
                 params.requires_grad = False
             num_ftrs: int = model.classifier[-1].in_features
-            model.classifier: nn.Sequential = nn.Sequential(
+            model.classifier = nn.Sequential(
                 nn.Dropout(p=0.2, inplace=False),
-                nn.Linear(in_features=num_ftrs, out_features=2, bias=True),
+                nn.Linear(in_features=num_ftrs, out_features=model_classes, bias=True),
             )
         if model_name == "vit_timm":
-            model: nn.Module = timm.create_model(" ", pretrained=True)
-            model.head: nn.Linear = nn.Linear(model.head.in_features, 2)
+            model: nn.Module = timm.create_model(
+                "vit_base_patch16_224", pretrained=True
+            )
+            model.head = nn.Linear(model.head.in_features, model_classes)
         model = model.to(device)
         return model
 
+    def load_criterion(self, criterion_name: str):
+        if criterion_name == "cross_entropy_loss":
+            criterion: nn.CrossEntropyLoss = nn.CrossEntropyLoss()
+        return criterion
+
+    def load_optimizer(self, optimizer_name):
+        if optimizer_name == "sgd":
+            optimizer: optim.SGD = optim.SGD(
+                params=self.model.parameters(), lr=0.001, momentum=0.9
+            )
+        if optimizer_name == "adam":
+            optimizer: optim.Adam = optim.Adam(params=self.model.parameters(), lr=0.01)
+        return optimizer
+
+    def load_scheduler(self, scheduler_name):
+        if scheduler_name == "step_lr":
+            scheduler: lr_scheduler.StepLR = lr_scheduler.StepLR(
+                self.optimizer, step_size=7, gamma=0.1
+            )
+        if scheduler_name == "multistep_lr":
+            scheduler: lr_scheduler.MultiStepLR = lr_scheduler.MultiStepLR(
+                self.optimizer, milestones=[6, 8, 9], gamma=0.1
+            )
+        return scheduler
+
     def train(self):
-        since:time = time.time()
-        best_model_wts = copy.deepcopy(self.model.state_dict())
-        best_loss = math.inf
-        test_acc_history = []
-        test_loss_history = []
-        best_acc = 0.0
+        since: float = time.time()
+        best_model_wts: OrderedDict = copy.deepcopy(self.model.state_dict())
+        best_loss: float = math.inf
+        test_acc_history: List = []
+        test_loss_history: List = []
+        best_acc: float = 0.0
 
         for epoch in tqdm(range(self.num_epochs)):
             logger.debug(f"Epoch {epoch}/{self.num_epochs - 1}")
@@ -80,12 +106,12 @@ class Trainer:
                 else:
                     self.model.eval()
 
-                current_loss = 0.0
-                current_accuracy = 0.0
+                current_loss: float = 0.0
+                current_accuracy: float = 0.0
 
                 for i, (inputs, labels) in enumerate(self.dataloaders[phase]):
-                    inputs = inputs.to(self.device)
-                    labels = labels.to(self.device)
+                    inputs: torch.Tensor = inputs.to(self.device)
+                    labels: torch.Tensor = labels.to(self.device)
 
                     self.optimizer.zero_grad()
 
@@ -95,9 +121,9 @@ class Trainer:
                         )
 
                     with torch.set_grad_enabled(phase == "train"):
-                        outputs = self.model(inputs)
+                        outputs: torch.Tensor = self.model(inputs)
                         _, preds = torch.max(outputs, 1)
-                        loss = self.criterion(outputs, labels)
+                        loss: torch.Tensor = self.criterion(outputs, labels)
 
                         # backward + optimize only if in training phase
                         if phase == "train":
@@ -107,8 +133,8 @@ class Trainer:
                     current_loss += loss.item() * inputs.size(0)
                     current_accuracy += torch.sum(preds == labels.data)
 
-                epoch_loss = current_loss / len(self.dataloaders[phase].dataset)
-                epoch_accuracy = current_accuracy.double() / len(
+                epoch_loss: float = current_loss / len(self.dataloaders[phase].dataset)
+                epoch_accuracy: float = current_accuracy / len(
                     self.dataloaders[phase].dataset
                 )
 
@@ -127,7 +153,7 @@ class Trainer:
                         best_loss = epoch_loss
                         best_acc = epoch_accuracy
                         best_model_wts = copy.deepcopy(self.model.state_dict())
-        time_elapsed = time.time() - since
+        time_elapsed: float = time.time() - since
         logger.info(
             f"Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s"
         )

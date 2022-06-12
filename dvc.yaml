@@ -64,7 +64,8 @@ stages:
         - src/models/configs/nn_config.yaml
         - src/models/train.py
       outs:
-        - models/nn_model_${item.data_type}
+        - models/nn_model_${item.data_type}:
+            persist: true
 
   validate_model:
     foreach:
@@ -73,11 +74,11 @@ stages:
       - dataset_path: data/processed/train_data_external/val/
         data_type: external
       - dataset_path: data/processed/train_data_both/val/
-        data_type: external
+        data_type: both
     do:
-      cmd: python3 src/models/validate.py  models/nn_model_${item.data_type}/data/model.pth ${item.dataset_path} ${item.data_type} src/models/configs/nn_config.yaml
+      cmd: python3 src/models/validate.py  models/nn_model_${item.data_type} ${item.dataset_path} ${item.data_type} src/models/configs/nn_config.yaml
       deps:
-        - models/nn_model_${item.data_type}/data/model.pth
+        - models/nn_model_${item.data_type}
         - ${item.dataset_path}
         - src/models/configs/nn_config.yaml
 
