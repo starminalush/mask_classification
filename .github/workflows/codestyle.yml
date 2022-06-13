@@ -53,8 +53,8 @@ jobs:
       - name: unit tests
         run: |
           poetry install
-          run dvc pull
-          run dvc repro
+          dvc pull
+          dvc repro
           pytest --disable-warnings
 
 
