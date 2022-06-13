@@ -24,5 +24,14 @@ mask_detection
 8. vaidate_model - подсчет качества модели на валидационной подвыборке
 
 
+**Управление жизненным циклом**
+
 Для управления жизненным циклом моделей был выбран MLFLow
+
+![image](https://user-images.githubusercontent.com/103132748/173439840-652850bb-5348-45f7-a9a0-f5e9c207848b.png)
+
+MLFlow был развернут по сценарию 4
+
+![image](https://user-images.githubusercontent.com/103132748/173440002-7a3bc0cb-962a-48b9-af36-4772574a6196.png)
+
 
