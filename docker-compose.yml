@@ -6,7 +6,7 @@ services:
     container_name: minio
     restart: always
     volumes:
-      - ./minio/data/:/data
+      - ./infrastracture_data/minio/data/:/data
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -25,22 +25,22 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       PGDATA: /data/postgres
     volumes:
-      - ./postgres:/data/postgres
+      - ./infrastracture_data/postgres:/data/postgres
     ports:
       - "5432:5432"
 
 
   mlflow:
     restart: always
-    build: ./mlflow/
+    build: ./docker/mlflow/
     container_name: mlflow_server
     depends_on:
       - postgres
       - minio
+    environment:
+       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+       AWS_SECRET_ACCESS_KEY:  ${AWS_SECRET_ACCESS_KEY}
+       MLFLOW_S3_ENDPOINT_URL : 'http://minio:9000'
     ports:
       - "5000:5000"
-    environment:
-      AWS_ACCESS_KEY_ID: 's3keys3key'
-      AWS_SECRET_ACCESS_KEY: 's3keys3key'
-      MLFLOW_S3_ENDPOINT_URL: 'http://minio:9000'
-    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --default-artifact-root s3://trainedmodels/ --host 0.0.0.0
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --default-artifact-root s3://${MINIO_MLFLOW_BUCKET}/ --host 0.0.0.0

@@ -1,4 +1,5 @@
 import os
+from typing import Dict, List
 
 import click
 import mlflow
@@ -7,72 +8,93 @@ import yaml
 from dotenv import load_dotenv
 from loguru import logger
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
-from torchvision import datasets
+from torch import nn
+from torch.utils.data import DataLoader
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
 
 load_dotenv()
 
-os.environ['MLFLOW_TRACKING_URI'] = "http://0.0.0.0:5000"
-os.environ['MLFLOW_S3_ENDPOINT_URL'] = "http://0.0.0.0:9000"
-os.environ['AWS_ACCESS_KEY_ID'] = "s3keys3key"
-os.environ['AWS_SECRET_ACCESS_KEY'] = "s3keys3key"
-mlflow.set_tracking_uri(os.environ['MLFLOW_TRACKING_URI'])
+os.environ["MLFLOW_TRACKING_URI"] = os.getenv("MLFLOW_TRACKING_URI")
+os.environ["MLFLOW_S3_ENDPOINT_URL"] = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID")
+os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
+mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
 
 
 @click.command()
-@click.argument('model_path', type=click.Path(exists=True))
-@click.argument('validation_dataset', type=click.Path(exists=True))
-@click.argument('data_type', type=click.STRING)
-@click.argument('config_path', type=click.Path(exists=True))
-def main(model_path: str, validation_dataset: str, data_type: str, config_path: str):
-    with open(config_path, 'r', encoding='utf-8') as stream:
-        config = yaml.safe_load(stream)
-    model = torch.load(model_path)
-    model = model.to('cuda')
+@click.argument("model_path", type=click.Path(exists=True))
+@click.argument("validation_dataset", type=click.Path(exists=True))
+@click.argument("dataset_type", type=click.STRING)
+@click.argument("config_path", type=click.Path(exists=True))
+def validate(
+    model_path: str, validation_dataset: str, dataset_type: str, config_path: str
+):
+    """
+    validate model on validate set
+    @param model_path: local model path
+    @type model_path: str
+    @param validation_dataset: validataion dataset patj
+    @type validation_dataset: str
+    @param dataset_type: dataset type(internal, external, both)
+    @type dataset_type: str
+    @param config_path: neural network config
+    @type config_path: str
+    """
+    with open(config_path, "r", encoding="utf-8") as stream:
+        config: Dict = yaml.safe_load(stream)
+    model: nn.Module = torch.load(
+        os.path.join(
+            model_path, f"{config['model_name']}_{dataset_type}/data/model.pth"
+        )
+    )
+    model = model.to("cuda")
 
-    data_transforms = transforms.Compose([
-        transforms.Resize([224, 224]),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    image_dataset = datasets.ImageFolder(validation_dataset,
-                                         data_transforms)
+    data_transforms: transforms.Compose = transforms.Compose(
+        [
+            transforms.Resize([224, 224]),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ]
+    )
+    image_dataset: ImageFolder = ImageFolder(validation_dataset, data_transforms)
 
-    logger.info(image_dataset.classes)
+    image_dataloader: DataLoader = DataLoader(
+        image_dataset, batch_size=1, num_workers=1
+    )
 
-    image_dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=1, num_workers=1)
-
-    y_predicted = []
-    y_gt = []
-    # since we're not training, we don't need to calculate the gradients for our outputs
+    y_predicted: List = []
+    y_gt: List = []
     with torch.no_grad():
         for data in image_dataloader:
             images, labels = data
-            images = images.to('cuda')
-            labels = labels.to('cuda')
-            outputs = model(images)
+            images: torch.Tensor = images.to("cuda")
+            labels: torch.Tensor = labels.to("cuda")
+            outputs: torch.Tensor = model(images)
             _, predicted = torch.max(outputs.data, 1)
             y_gt.append(labels.item())
             y_predicted.append(predicted.item())
 
-    accuracy = accuracy_score(y_gt, y_predicted)
-    f1 = f1_score(y_gt, y_predicted, average='weighted')
-    precision = precision_score(y_gt, y_predicted, average='weighted')
-    recall = recall_score(y_gt, y_predicted, average='weighted', zero_division=True)
-    logger.info(f'data type {data_type}')
-    logger.debug(f'accuracy: {accuracy}')
-    logger.debug(f'f1: {f1}')
-    logger.debug(f'precision: {precision}')
-    logger.debug(f'recall: {recall}')
+    accuracy: float = accuracy_score(y_gt, y_predicted)
+    f1: float = f1_score(y_gt, y_predicted, average="weighted")
+    precision: float = precision_score(y_gt, y_predicted, average="weighted")
+    recall: float = recall_score(
+        y_gt, y_predicted, average="weighted", zero_division=True
+    )
+    logger.info(f"data type {dataset_type}")
+    logger.debug(f"accuracy: {accuracy}")
+    logger.debug(f"f1: {f1}")
+    logger.debug(f"precision: {precision}")
+    logger.debug(f"recall: {recall}")
 
-    experiment_id = mlflow.set_experiment(config['model_name']).experiment_id
+    experiment_id: str = mlflow.set_experiment(config["model_name"]).experiment_id
     with mlflow.start_run(experiment_id=experiment_id):
-        mlflow.log_param('dataset_type', data_type)
-        mlflow.log_metric('accuracy', accuracy)
-        mlflow.log_metric('f1', f1)
-        mlflow.log_metric('precision', precision)
-        mlflow.log_metric('recall', recall)
+        mlflow.log_param("dataset_type", dataset_type)
+        mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("f1", f1)
+        mlflow.log_metric("precision", precision)
+        mlflow.log_metric("recall", recall)
 
 
 if __name__ == "__main__":
-    main()
+    validate()

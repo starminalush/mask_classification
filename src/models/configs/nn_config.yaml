@@ -1,5 +1,9 @@
 #возможные модели vit_timm, resnet, mobilenet
 model_name: 'resnet'
+pretrained: true
 num_classes: 2
-batch_size: 16
+batch_size: 512
 num_epochs: 10
+criterion: 'cross_entropy_loss'
+optimizer: 'sgd'
+scheduler: 'step_lr'
