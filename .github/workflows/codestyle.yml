@@ -49,6 +49,10 @@ jobs:
 
   pytest:
     runs-on: self-hosted
+    strategy:
+      matrix:
+        # Set the Python version(s) to run the tests with
+        python-version: [ 3.9 ]
     steps:
       - name: unit tests
         run: |
