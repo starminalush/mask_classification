@@ -2,8 +2,8 @@
 model_name: 'resnet'
 pretrained: true
 num_classes: 2
-batch_size: 16
-num_epochs: 1
+batch_size: 512
+num_epochs: 10
 criterion: 'cross_entropy_loss'
-optimizer: 'adam'
-scheduler: 'multistep_lr'
+optimizer: 'sgd'
+scheduler: 'step_lr'

@@ -120,14 +120,14 @@ stages:
       size: 170712150
       nfiles: 4094
     - path: src/models/configs/nn_config.yaml
-      md5: 128b25ac70d630bcecd25f76a37e134d
-      size: 218
+      md5: adaa44f88dc63a0cf47e402ecb026cf9
+      size: 214
     - path: src/models/train.py
       md5: 6348020097b5f32a00d7d408b2575481
       size: 5261
     outs:
     - path: models/nn_model_internal
-      md5: fc0810776d5592c3fcd3771c83d14270.dir
+      md5: 77ce2a411861c19bcac28869bce822bf.dir
       size: 206369892
       nfiles: 14
   train_model@1:
@@ -142,11 +142,11 @@ stages:
       md5: 128b25ac70d630bcecd25f76a37e134d
       size: 218
     - path: src/models/train.py
-      md5: 3f91ec96c8c4c444d5965ba2abb84126
-      size: 5509
+      md5: 6348020097b5f32a00d7d408b2575481
+      size: 5261
     outs:
     - path: models/nn_model_external
-      md5: eb2c54b816aeb1cdda3d1ca08eb1261c.dir
+      md5: c7c4c8eca9717f7fccdc584e0baa19f8.dir
       size: 206369892
       nfiles: 14
   validate_model@1:
@@ -158,7 +158,7 @@ stages:
       size: 1671049
       nfiles: 408
     - path: models/nn_model_external
-      md5: eb2c54b816aeb1cdda3d1ca08eb1261c.dir
+      md5: c7c4c8eca9717f7fccdc584e0baa19f8.dir
       size: 206369892
       nfiles: 14
     - path: src/models/configs/nn_config.yaml
@@ -192,12 +192,12 @@ stages:
       size: 17848485
       nfiles: 410
     - path: models/nn_model_internal
-      md5: fc0810776d5592c3fcd3771c83d14270.dir
+      md5: 77ce2a411861c19bcac28869bce822bf.dir
       size: 206369892
       nfiles: 14
     - path: src/models/configs/nn_config.yaml
-      md5: 128b25ac70d630bcecd25f76a37e134d
-      size: 218
+      md5: adaa44f88dc63a0cf47e402ecb026cf9
+      size: 214
   validate_model@2:
     cmd: python3 src/models/validate.py  models/nn_model_both data/processed/train_data_both/val/
       both src/models/configs/nn_config.yaml

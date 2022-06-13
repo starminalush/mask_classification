@@ -9,8 +9,9 @@ from dotenv import load_dotenv
 from loguru import logger
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 from torch import nn
-from torchvision import datasets
+from torch.utils.data import DataLoader
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
 
 load_dotenv()
 
@@ -24,13 +25,26 @@ mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
 @click.command()
 @click.argument("model_path", type=click.Path(exists=True))
 @click.argument("validation_dataset", type=click.Path(exists=True))
-@click.argument("data_type", type=click.STRING)
+@click.argument("dataset_type", type=click.STRING)
 @click.argument("config_path", type=click.Path(exists=True))
-def main(model_path: str, validation_dataset: str, data_type: str, config_path: str):
+def main(model_path: str, validation_dataset: str, dataset_type: str, config_path: str):
+    """
+    validate model on validate set
+    @param model_path: local model path
+    @type model_path: str
+    @param validation_dataset: validataion dataset patj
+    @type validation_dataset: str
+    @param dataset_type: dataset type(internal, external, both)
+    @type dataset_type: str
+    @param config_path: neural network config
+    @type config_path: str
+    """
     with open(config_path, "r", encoding="utf-8") as stream:
         config: Dict = yaml.safe_load(stream)
     model: nn.Module = torch.load(
-        os.path.join(model_path, f"{config['model_name']}_{data_type}/data/model.pth")
+        os.path.join(
+            model_path, f"{config['model_name']}_{dataset_type}/data/model.pth"
+        )
     )
     model = model.to("cuda")
 
@@ -41,13 +55,9 @@ def main(model_path: str, validation_dataset: str, data_type: str, config_path: 
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
         ]
     )
-    image_dataset: datasets.ImageFolder = datasets.ImageFolder(
-        validation_dataset, data_transforms
-    )
+    image_dataset: ImageFolder = ImageFolder(validation_dataset, data_transforms)
 
-    logger.info(image_dataset.classes)
-
-    image_dataloader: torch.utils.data.DataLoader = torch.utils.data.DataLoader(
+    image_dataloader: DataLoader = DataLoader(
         image_dataset, batch_size=1, num_workers=1
     )
 
@@ -69,7 +79,7 @@ def main(model_path: str, validation_dataset: str, data_type: str, config_path: 
     recall: float = recall_score(
         y_gt, y_predicted, average="weighted", zero_division=True
     )
-    logger.info(f"data type {data_type}")
+    logger.info(f"data type {dataset_type}")
     logger.debug(f"accuracy: {accuracy}")
     logger.debug(f"f1: {f1}")
     logger.debug(f"precision: {precision}")
@@ -77,7 +87,7 @@ def main(model_path: str, validation_dataset: str, data_type: str, config_path: 
 
     experiment_id: str = mlflow.set_experiment(config["model_name"]).experiment_id
     with mlflow.start_run(experiment_id=experiment_id):
-        mlflow.log_param("dataset_type", data_type)
+        mlflow.log_param("dataset_type", dataset_type)
         mlflow.log_metric("accuracy", accuracy)
         mlflow.log_metric("f1", f1)
         mlflow.log_metric("precision", precision)
