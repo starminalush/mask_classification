@@ -59,7 +59,7 @@ jobs:
           poetry install
           dvc pull
           dvc repro
-          pytest --disable-warnings
+          pytest
 
 
         
