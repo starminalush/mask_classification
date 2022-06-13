@@ -7,7 +7,7 @@ from loguru import logger
 from pandas import DataFrame
 
 
-@click.command('make_dataset')
+@click.command("make_dataset")
 @click.argument("annotation_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
 def make_dataset(annotation_filepath: str, output_filepath: str):

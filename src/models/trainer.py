@@ -43,7 +43,7 @@ class Trainer:
         )
 
     @staticmethod
-    def prepare_dataloaders(dataset_path: str)->Dict:
+    def prepare_dataloaders(dataset_path: str) -> Dict:
         data_transforms: Dict = {
             "train": transforms.Compose(
                 [
@@ -71,16 +71,14 @@ class Trainer:
         }
 
         dataloaders: Dict = {
-            x: DataLoader(
-                image_datasets[x], batch_size=4, shuffle=True, num_workers=4
-            )
+            x: DataLoader(image_datasets[x], batch_size=4, shuffle=True, num_workers=4)
             for x in ["train", "test"]
         }
         return dataloaders
 
     @staticmethod
     def load_model(
-            model_name: str, model_classes: int, pretrained=True, device="cuda"
+        model_name: str, model_classes: int, pretrained=True, device="cuda"
     ) -> nn.Module:
         model = None
         if model_name == "resnet":
@@ -112,7 +110,7 @@ class Trainer:
 
     @staticmethod
     def load_optimizer(
-            optimizer_name: str, model_parameters: Union[Iterable[Tensor], Iterable[dict]]
+        optimizer_name: str, model_parameters: Union[Iterable[Tensor], Iterable[dict]]
     ) -> Optimizer:
         if optimizer_name == "sgd":
             optimizer: SGD = SGD(params=model_parameters, lr=0.001, momentum=0.9)

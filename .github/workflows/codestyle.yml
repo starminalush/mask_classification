@@ -47,20 +47,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
         black --check --verbose .
 
-  pytest:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Set the Python version(s) to run the tests with
-        python-version: [ 3.9 ]
-    steps:
-      - name: unit tests
-        run: |
-          pip install poetry
-          poetry install
-          dvc pull
-          dvc repro
-          pytest
 
 
         
