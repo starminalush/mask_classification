@@ -9,10 +9,10 @@ from loguru import logger
 @click.argument("raw_dataset_filepath", type=click.Path(exists=True))
 @click.argument("external_dataset_filepath", type=click.Path(exists=True))
 @click.argument("train_dataset_filepath", type=click.Path())
-def main(
-    raw_dataset_filepath: str,
-    external_dataset_filepath: str,
-    train_dataset_filepath: str,
+def mix_datasets(
+        raw_dataset_filepath: str,
+        external_dataset_filepath: str,
+        train_dataset_filepath: str,
 ):
     """
     mix internal and external dataset together
@@ -39,4 +39,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    mix_datasets()

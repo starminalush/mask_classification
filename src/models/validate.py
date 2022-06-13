@@ -27,7 +27,9 @@ mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
 @click.argument("validation_dataset", type=click.Path(exists=True))
 @click.argument("dataset_type", type=click.STRING)
 @click.argument("config_path", type=click.Path(exists=True))
-def main(model_path: str, validation_dataset: str, dataset_type: str, config_path: str):
+def validate(
+    model_path: str, validation_dataset: str, dataset_type: str, config_path: str
+):
     """
     validate model on validate set
     @param model_path: local model path
@@ -95,4 +97,4 @@ def main(model_path: str, validation_dataset: str, dataset_type: str, config_pat
 
 
 if __name__ == "__main__":
-    main()
+    validate()

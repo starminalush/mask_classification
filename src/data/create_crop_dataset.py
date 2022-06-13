@@ -10,11 +10,11 @@ from pandas.core.series import Series
 from tqdm import tqdm
 
 
-@click.command()
+@click.command('create_crop_dataset')
 @click.argument("clean_annotation_filepath", type=click.Path(exists=True))
 @click.argument("inputdir_filepath", type=click.Path())
 @click.argument("outputdir_filepath", type=click.Path())
-def main(
+def create_crop_dataset(
     clean_annotation_filepath: str, inputdir_filepath: str, outputdir_filepath: str
 ):
     """
@@ -56,4 +56,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    create_crop_dataset()

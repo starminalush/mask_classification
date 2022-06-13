@@ -4,8 +4,8 @@ stages:
     cmd: python3 src/data/download_dataset.py data/external/face-mask-detection
     deps:
     - path: src/data/download_dataset.py
-      md5: fc7e8768fe43d0a6d2cf10d80cd0f6ec
-      size: 824
+      md5: dcf0c3130fe2f3f9eb109e5553f84d99
+      size: 848
     outs:
     - path: data/external/face-mask-detection
       md5: a9f3f3bdfe2ce374f40ce50d314a5f86.dir
@@ -20,8 +20,8 @@ stages:
       size: 1576046
       nfiles: 853
     - path: src/data/make_dataset.py
-      md5: 076970bb99bcf8d8b3df62145f73f5f4
-      size: 2880
+      md5: bec0ee8af71e052945ad154dd2f49a85
+      size: 2910
     outs:
     - path: data/interim/annotations.csv
       md5: 23930ef35eae8a5ad4c573a056289310
@@ -37,8 +37,8 @@ stages:
       md5: 23930ef35eae8a5ad4c573a056289310
       size: 200129
     - path: src/data/create_crop_dataset.py
-      md5: af39756da35f8c59a1b491e58eee2c77
-      size: 2023
+      md5: 53f6504dbba881b4846ccd6344ec88cb
+      size: 2074
     outs:
     - path: data/processed/cropped_images
       md5: 8859ced0fc987ff3a43c0e6c2f8ad564.dir
@@ -52,11 +52,11 @@ stages:
       size: 170712150
       nfiles: 4094
     - path: src/models/train_test_split.py
-      md5: f3d021675a31e82fe8dd62e02fef096e
-      size: 2548
+      md5: f2e5c617ac9e1c8c3d2cdfe5296caaf0
+      size: 2662
     outs:
     - path: data/processed/train_data_internal/
-      md5: b3d9e2cfd8ba19171f2d6de1381e9d8d.dir
+      md5: 6fdb0790b2d96568ddbe48adbb27c9bf.dir
       size: 170712150
       nfiles: 4094
   merge_datasets:
@@ -72,8 +72,8 @@ stages:
       size: 170712150
       nfiles: 4094
     - path: src/data/mix_datasets.py
-      md5: 5b768626f2ead57d2a74ecd7bfde334a
-      size: 1467
+      md5: fc686a712b7776a8ed4b0fd3b3826492
+      size: 1495
     outs:
     - path: data/processed/unsplit_train_data/
       md5: f1f0e3fb69493a218c62bc4feb8f0c5a.dir
@@ -88,11 +88,11 @@ stages:
       size: 16469041
       nfiles: 4072
     - path: src/models/train_test_split.py
-      md5: f3d021675a31e82fe8dd62e02fef096e
-      size: 2548
+      md5: f2e5c617ac9e1c8c3d2cdfe5296caaf0
+      size: 2662
     outs:
     - path: data/processed/train_data_external/
-      md5: dd9c8f9a8a88f00b7ea1aa91b0b49f22.dir
+      md5: 64e3f2d9064cda011af21654dd33b3ad.dir
       size: 16469041
       nfiles: 4072
   train_test_split@2:
@@ -104,11 +104,11 @@ stages:
       size: 187181191
       nfiles: 8166
     - path: src/models/train_test_split.py
-      md5: f3d021675a31e82fe8dd62e02fef096e
-      size: 2548
+      md5: f2e5c617ac9e1c8c3d2cdfe5296caaf0
+      size: 2662
     outs:
     - path: data/processed/train_data_both/
-      md5: 56bd6fca0fea67ef178c9c3e072a0497.dir
+      md5: 42f6cabb3fe481e97f2d2b15fe671dee.dir
       size: 187181191
       nfiles: 8166
   train_model@0:
@@ -120,15 +120,15 @@ stages:
       size: 170712150
       nfiles: 4094
     - path: src/models/configs/nn_config.yaml
-      md5: adaa44f88dc63a0cf47e402ecb026cf9
+      md5: ae6a61106da03003b9c224fbfcb415c9
       size: 214
     - path: src/models/train.py
-      md5: 6348020097b5f32a00d7d408b2575481
-      size: 5261
+      md5: 7f63d352887ac95319178edd705e79df
+      size: 3571
     outs:
     - path: models/nn_model_internal
-      md5: 77ce2a411861c19bcac28869bce822bf.dir
-      size: 206369892
+      md5: b0a430e22264bdcbbaef7b73851b3654.dir
+      size: 206369756
       nfiles: 14
   train_model@1:
     cmd: python3 src/models/train.py  data/processed/train_data_external/ external
@@ -139,14 +139,14 @@ stages:
       size: 16469041
       nfiles: 4072
     - path: src/models/configs/nn_config.yaml
-      md5: 128b25ac70d630bcecd25f76a37e134d
-      size: 218
+      md5: ae6a61106da03003b9c224fbfcb415c9
+      size: 214
     - path: src/models/train.py
-      md5: 6348020097b5f32a00d7d408b2575481
-      size: 5261
+      md5: 7f63d352887ac95319178edd705e79df
+      size: 3571
     outs:
     - path: models/nn_model_external
-      md5: c7c4c8eca9717f7fccdc584e0baa19f8.dir
+      md5: 8410aa3f19bb35f907a4183cc1f0c1cb.dir
       size: 206369892
       nfiles: 14
   validate_model@1:
@@ -158,12 +158,12 @@ stages:
       size: 1671049
       nfiles: 408
     - path: models/nn_model_external
-      md5: c7c4c8eca9717f7fccdc584e0baa19f8.dir
+      md5: 8410aa3f19bb35f907a4183cc1f0c1cb.dir
       size: 206369892
       nfiles: 14
     - path: src/models/configs/nn_config.yaml
-      md5: 128b25ac70d630bcecd25f76a37e134d
-      size: 218
+      md5: ae6a61106da03003b9c224fbfcb415c9
+      size: 214
   train_model@2:
     cmd: python3 src/models/train.py  data/processed/train_data_both both src/models/configs/nn_config.yaml
       models/nn_model_both
@@ -173,14 +173,14 @@ stages:
       size: 187181191
       nfiles: 8166
     - path: src/models/configs/nn_config.yaml
-      md5: 128b25ac70d630bcecd25f76a37e134d
-      size: 218
+      md5: ae6a61106da03003b9c224fbfcb415c9
+      size: 214
     - path: src/models/train.py
-      md5: 6348020097b5f32a00d7d408b2575481
-      size: 5261
+      md5: 7f63d352887ac95319178edd705e79df
+      size: 3571
     outs:
     - path: models/nn_model_both
-      md5: 3605949483d567421d1b72a8c8c669d3.dir
+      md5: 1d891519f1ab0ab7aa24410071b516bf.dir
       size: 206369892
       nfiles: 14
   validate_model@0:
@@ -192,11 +192,11 @@ stages:
       size: 17848485
       nfiles: 410
     - path: models/nn_model_internal
-      md5: 77ce2a411861c19bcac28869bce822bf.dir
-      size: 206369892
+      md5: b0a430e22264bdcbbaef7b73851b3654.dir
+      size: 206369756
       nfiles: 14
     - path: src/models/configs/nn_config.yaml
-      md5: adaa44f88dc63a0cf47e402ecb026cf9
+      md5: ae6a61106da03003b9c224fbfcb415c9
       size: 214
   validate_model@2:
     cmd: python3 src/models/validate.py  models/nn_model_both data/processed/train_data_both/val/
@@ -207,9 +207,9 @@ stages:
       size: 20972927
       nfiles: 817
     - path: models/nn_model_both
-      md5: 3605949483d567421d1b72a8c8c669d3.dir
+      md5: 1d891519f1ab0ab7aa24410071b516bf.dir
       size: 206369892
       nfiles: 14
     - path: src/models/configs/nn_config.yaml
-      md5: 128b25ac70d630bcecd25f76a37e134d
-      size: 218
+      md5: ae6a61106da03003b9c224fbfcb415c9
+      size: 214

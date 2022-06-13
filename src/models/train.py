@@ -24,7 +24,7 @@ mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
 @click.argument("dataset_type", type=click.STRING)
 @click.argument("config_path", type=click.Path(exists=True))
 @click.argument("model_path", type=click.Path())
-def main(dataset_path: str, config_path: str, dataset_type: str, model_path: str):
+def train(dataset_path: str, config_path: str, dataset_type: str, model_path: str):
     """
     train model on train data and test in time of training on training data
     @param dataset_path: dataset for train and test model
@@ -88,4 +88,4 @@ def main(dataset_path: str, config_path: str, dataset_type: str, model_path: str
 
 
 if __name__ == "__main__":
-    main()
+    train()

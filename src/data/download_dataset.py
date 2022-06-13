@@ -16,7 +16,7 @@ api.authenticate()
 
 @click.command()
 @click.argument("external_dataset_path", type=click.Path())
-def main(external_dataset_path: str):
+def download_dataset(external_dataset_path: str):
     """
     download external dataset from kaggle.
     Link https://www.kaggle.com/datasets/andrewmvd/face-mask-detection
@@ -29,4 +29,4 @@ def main(external_dataset_path: str):
 
 
 if __name__ == "__main__":
-    main()
+    download_dataset()

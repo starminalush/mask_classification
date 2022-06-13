@@ -7,10 +7,10 @@ from loguru import logger
 from pandas import DataFrame
 
 
-@click.command()
+@click.command('make_dataset')
 @click.argument("annotation_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
-def main(annotation_filepath: str, output_filepath: str):
+def make_dataset(annotation_filepath: str, output_filepath: str):
     """
     Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
@@ -76,4 +76,4 @@ def main(annotation_filepath: str, output_filepath: str):
 
 
 if __name__ == "__main__":
-    main()
+    make_dataset()
