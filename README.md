@@ -3,55 +3,26 @@ mask_detection
 
 Репозиторий для классификации масок (есть маска, нет маски)
 
-Project Organization
-------------
+**Данные**
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+Внешние данные были взяты с [kaggle](https://www.kaggle.com/datasets/andrewmvd/face-mask-detection)
+
+**Описание пайплайна**
+
+![Untitled Diagram drawio](https://user-images.githubusercontent.com/103132748/173438512-78498ee3-a48f-4bb0-8ec2-6b7c1614c527.png)
+
+Пайплайн состоит из нескольких stages:
+1. download_external_dataset - скачивает датасет с kaggle
+2. make_dataset_external - парсит xml файлы для каждого изображения и собирает файл annotations.csv со следующими колонками (xmin,ymin,xmax,ymax,name,file,width,height)
+3. create_crop_dataset_external - так как мы скачали датасет для детекции лиц, а решаем задачу классификации, данный stage вырезает все лица с изображений и складывает их по папкам в зависимости от класса
+4. merge_dataset - мерджит исходный внутренний датасет с нарезанным внешним
+
+Следующие stages выполняются для каждого типа датасета по отдельности (internal: только внутренние данные, которые изначально были, external: только те данные, которые скачали и нарезали с kaggle, both: смешанные internal и external датасеты)
+
+6. train_test_split - делит данные для обучения на train, test и val подвыборки
+7. train_model - обучает модель. Возможно обучение трех разные видов моделей - mobilenetv2, resnet50 и vit_base_patch16_224
+8. vaidate_model - подсчет качества модели на валидационной подвыборке
 
 
---------
+Для управления жизненным циклом моделей был выбран MLFLow
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
