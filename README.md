@@ -41,5 +41,5 @@ MLFlow был развернут по сценарию 4
 
 **Запуск обучения**
 
-1. Выбрать модель и параметры в scr/models/nn_config.yaml
+1. Выбрать модель и параметры в scr/models/configs/nn_config.yaml. Либо создать свой конфиг и указать его в stages train_model и validate
 2. dvc repro
