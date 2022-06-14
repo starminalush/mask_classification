@@ -40,6 +40,8 @@ MLFlow был развернут по сценарию 4
 В качестве метрик были выбраны accuracy, precision, recall и f1 мера как наиболее подходящие для задачи классификации
 
 **Запуск обучения**
-
-1. Выбрать модель и параметры в scr/models/configs/nn_config.yaml. Либо создать свой конфиг и указать его в stages train_model и validate_model
-2. dvc repro :)
+1. Поднять все контейнеры командой docker-compose up --build -d
+2. Инициализовать dvc и поключить его к minio контейнеру.
+3. Сделать файл .env и заполнить там значения на основе файла .env.dist
+4. Выбрать модель и параметры в scr/models/configs/nn_config.yaml. Либо создать свой конфиг и указать его в stages train_model и validate_model
+5. dvc repro :)
